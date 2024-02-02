@@ -13,11 +13,11 @@ const calSum = (num) => {
 
 function callbackFunc(req, resp) {
     const total = calSum(100)
-    const res = `Ans is ${total}`
+    const res = `Answer is ${total}`
     resp.send(res)
 }
 
-app.get('/', callbackFunc)
+app.get('/Answer', callbackFunc)
 
 app.listen(port, () => {
     console.log(`Server running on port ${port}`)
