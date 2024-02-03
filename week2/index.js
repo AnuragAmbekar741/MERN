@@ -9,7 +9,7 @@ function middleware1(req, res, next) {
     numOfreq += 1
     console.log("from inside middleware ", req.headers.num)
     console.log(`number of request - ${numOfreq}`)
-    if (req.headers.num || req.query.num || req.body.num) next()
+    if (req.headers.num || req.query.num || req.body.numgit) next()
     else res.send('bad request')
 }
 
