@@ -15,6 +15,7 @@ const getAllTodos = (req, res) => {
 const addTodo = (req, res) => {
     id = Math.floor(Math.random() * 100000)
     const todo = req.body
+    console.log(todo)
     const newtodo = { ...todo, id: id }
     todos.push(newtodo)
     res.send(todos)
@@ -43,8 +44,7 @@ app.put('/todos/:id', (req, resp) => {
     if (todoIndex === -1) resp.status(403).send("No todo found")
     else {
         todos[todoIndex].title = req.body.title
-        todos[todoIndex].description = req.body.description
-        resp.json(todos[todoIndex])
+        resp.json(todos)
     }
 })
 
