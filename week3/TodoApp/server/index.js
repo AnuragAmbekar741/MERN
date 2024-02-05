@@ -1,12 +1,16 @@
 const express = require("express")
 const bodyParser = require("body-parser");
+const path = require('path');
+const cors = require('cors')
 
 const app = express()
 const port = 3000
 
 app.use(bodyParser.json())
-
+app.use(cors())
 var todos = []
+
+
 
 const getAllTodos = (req, res) => {
     return res.send(todos)
@@ -50,5 +54,10 @@ app.put('/todos/:id', (req, resp) => {
 
 app.get('/todos', getAllTodos)
 app.post('/addTodo', addTodo)
+
+app.get("/", (req, res) => {
+    res.sendFile(path.join(__dirname + "/index.html"));
+})
+
 
 app.listen(port, () => console.log(`Server running on port ${port}`))

@@ -14,6 +14,10 @@ function App() {
   const [todoList, setTodoList] = useState<Todo[]>([]);
 
   const updateTodo = async (id: number) => {
+    if (todo.title == "") {
+      alert("Please add updated todo title");
+      return;
+    }
     const data = await fetch(`http://localhost:3000/todos/${id}`, {
       method: "PUT",
       headers: {
@@ -23,6 +27,7 @@ function App() {
     });
     const json = await data.json();
     setTodoList(json);
+    setTodo({ ...todo, title: "" });
   };
 
   const deleteTodo = async (id: number) => {
@@ -88,11 +93,11 @@ function App() {
               <h1 className="text-md font-medium">{todo.title}</h1>
               <div className="flex">
                 <MdModeEdit
-                  className="text-2xl"
+                  className="text-2xl text-sky-500"
                   onClick={() => updateTodo(todo.id)}
                 />
                 <MdDelete
-                  className="text-2xl"
+                  className="text-2xl text-red-500"
                   onClick={() => deleteTodo(todo.id)}
                 />
               </div>
