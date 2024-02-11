@@ -27,7 +27,7 @@ app.post('/signup', (req, resp) => {
     resp.json({ message: "user added successfully" })
 })
 
-app.post('/signin', (req, resp) => {
+app.post('/', (req, resp) => {
     const { email, password } = req.body
     const user = users.find(user => user.email === email && user.password === password)
     if (user) return resp.json({ message: "login successfully" })
