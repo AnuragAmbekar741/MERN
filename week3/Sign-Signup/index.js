@@ -28,9 +28,10 @@ app.post('/signup', (req, resp) => {
 })
 
 app.post('/signin', (req, resp) => {
-    const { username, password, confirmpass } = req.body
-    users.push({ username: username, password: password })
-    resp.json({ message: "user added successfully" })
+    const { email, password } = req.body
+    const user = users.find(user => user.email === email && user.password === password)
+    if (user) return resp.json({ message: "login successfully" })
+    else return resp.json({ message: "Invalid credentials" })
 })
 
 app.listen(port, () => console.log(`server running on ${port}`))
