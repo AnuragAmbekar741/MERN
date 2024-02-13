@@ -6,6 +6,8 @@ const jwt = require("jsonwebtoken")
 const app = express()
 const port = 3000
 
+const SECRET = "seCr3tK3y4jwt"
+
 app.use(bodyParser.json())
 
 const users = []
