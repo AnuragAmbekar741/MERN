@@ -12,6 +12,7 @@ app.use(bodyParser.json())
 
 const users = []
 
+const generateJwt = () => { }
 
 app.get('/', (req, resp) => {
     resp.sendFile(path.join(__dirname + "/sign-in.html"))
