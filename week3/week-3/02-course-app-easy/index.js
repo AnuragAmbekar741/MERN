@@ -14,6 +14,14 @@ const adminAuth = (req, res, next) => {
   if (!admin) return res.json({ message: "Wrong credentials" })
 }
 
+
+const userAuth = (req, res, next) => {
+  const { username, password } = req.headers
+  const user = USERS.find(user => user.username === username && user.password === password)
+  if (user) return next()
+  if (!user) return res.json({ message: "Wrong credentials" })
+}
+
 // Admin routes
 app.post('/admin/signup', (req, res) => {
   const { username, password } = req.headers
@@ -24,7 +32,7 @@ app.post('/admin/signup', (req, res) => {
 });
 
 app.post('/admin/login', (req, res) => {
-  res.json({ message: 'Admin created successfully' });
+  res.json({ message: 'Admin logged in successfully' });
 });
 
 app.post('/admin/courses', adminAuth, (req, res) => {
@@ -44,8 +52,8 @@ app.post('/users/signup', (req, res) => {
   // logic to sign up user
 });
 
-app.post('/users/login', (req, res) => {
-  // logic to log in user
+app.post('/users/login', userAuth, (req, res) => {
+  res.json({ message: 'User logged in successfully' });
 });
 
 app.get('/users/courses', (req, res) => {
