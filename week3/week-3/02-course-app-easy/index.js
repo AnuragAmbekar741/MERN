@@ -1,3 +1,12 @@
+// Learnings
+// Req from browser/client or resp to browser/client will always be STRING
+// To avoid extra logic on route we use middlewares where  logic can be performed on input data set.
+// Using next() of middle wares we can pass it particular router - adminAuth and userAuth in below routes 
+// app.use(express.json()) vs app.use(bodyParser.json());
+
+
+
+
 const express = require('express');
 const app = express();
 
@@ -31,49 +40,46 @@ app.post('/admin/signup', (req, res) => {
   return res.json({ message: "Admin created successfully!" })
 });
 
-app.post('/admin/login', (req, res) => {
+app.post('/admin/login', adminAuth, (req, res) => {
   res.json({ message: 'Admin logged in successfully' });
 });
 
 app.post('/admin/charachter', adminAuth, (req, res) => {
   var charachter = req.body
   const charachterId = Math.floor(Math.random() * 1000000000000000)
-  charachter = { ...newCourse, id: charachterId }
-  // console.log(newCourse)
-  CHARACHTERS.push(newCourse)
+  charachter = { ...charachter, id: charachterId }
+  // console.log(charachter)
+  CHARACHTERS.push(charachter)
   res.json({ message: "Charachter added", characters: CHARACHTERS })
 });
 
-app.put('/admin/courses/:charachterId', adminAuth, (req, res) => {
+app.get('/admin/charachter/:charachterId', adminAuth, (req, res) => {
   const id = req.params.charachterId
-  const charachter = CHARACHTERS.find(charachter => charachter.id === id)
+  console.log(id)
+  const charachter = CHARACHTERS.find(charachter => charachter.id === parseInt(id))
   if (charachter) return res.json({ charachter: charachter })
   res.json({ message: "invalid character id" })
 });
 
-app.get('/admin/courses', (req, res) => {
-  // logic to get all courses
+app.get('/admin/charachters', adminAuth, (req, res) => {
+  res.json({ charachters: CHARACHTERS })
 });
 
 // User routes
 app.post('/users/signup', (req, res) => {
-  // logic to sign up user
+  const User = req.headers
+  const isNewUser = USERS.find(user => user.username === User.username)
+  if (isNewUser) return res.json({ message: "user exists" })
+  USERS.push(User)
+  res.json({ message: "user added successfully" })
 });
 
 app.post('/users/login', userAuth, (req, res) => {
   res.json({ message: 'User logged in successfully' });
 });
 
-app.get('/users/courses', (req, res) => {
-  // logic to list all courses
-});
-
-app.post('/users/courses/:courseId', (req, res) => {
-  // logic to purchase a course
-});
-
-app.get('/users/purchasedCourses', (req, res) => {
-  // logic to view purchased courses
+app.get('/users/charachters', userAuth, (req, res) => {
+  res.json({ charachters: CHARACHTERS })
 });
 
 app.listen(3000, () => {
