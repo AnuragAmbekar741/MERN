@@ -5,7 +5,7 @@ app.use(express.json());
 
 let ADMINS = [];
 let USERS = [];
-let COURSES = [];
+let CHARACHTERS = [];
 
 const adminAuth = (req, res, next) => {
   const { username, password } = req.headers
@@ -35,12 +35,20 @@ app.post('/admin/login', (req, res) => {
   res.json({ message: 'Admin logged in successfully' });
 });
 
-app.post('/admin/courses', adminAuth, (req, res) => {
-  // logic to create a course
+app.post('/admin/charachter', adminAuth, (req, res) => {
+  var charachter = req.body
+  const charachterId = Math.floor(Math.random() * 1000000000000000)
+  charachter = { ...newCourse, id: charachterId }
+  // console.log(newCourse)
+  CHARACHTERS.push(newCourse)
+  res.json({ message: "Charachter added", characters: CHARACHTERS })
 });
 
-app.put('/admin/courses/:courseId', (req, res) => {
-  // logic to edit a course
+app.put('/admin/courses/:charachterId', adminAuth, (req, res) => {
+  const id = req.params.charachterId
+  const charachter = CHARACHTERS.find(charachter => charachter.id === id)
+  if (charachter) return res.json({ charachter: charachter })
+  res.json({ message: "invalid character id" })
 });
 
 app.get('/admin/courses', (req, res) => {
