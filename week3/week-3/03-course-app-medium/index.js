@@ -1,11 +1,40 @@
 const express = require('express');
+const jwt = require('jsonwebtoken')
+const fs = require("fs")
 const app = express();
+
 
 app.use(express.json());
 
 let ADMINS = [];
 let USERS = [];
 let COURSES = [];
+
+const SECRET = "S#C#RETKEY"
+
+try {
+  ADMINS = JSON.parse(fs.readFileSync('admin.json', 'utf-8'))
+  USERS = JSON.parse(fs.readFileSync('user.json', 'utf-8'))
+  COURSES = JSON.parse(fs.readFileSync('courses.json', 'utf-8'))
+
+} catch (e) {
+  ADMINS = []
+  USERS = []
+  COURSES = []
+}
+
+const authenticateJwt = (req, res, next) => {
+  const authHeader = req.headers.authorization
+  if (authHeader) {
+    const token = authHeader.split(' ')[1]
+    jwt.verify(token, SECRET, (err, user) => {
+      if (err) return res.status(403).json({ message: "Invalid user" })
+      req.user = user
+      next()
+    })
+  } else return res.json({ message: "Invalid user" })
+}
+
 
 // Admin routes
 app.post('/admin/signup', (req, res) => {
