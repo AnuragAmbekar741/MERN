@@ -38,11 +38,29 @@ const authenticateJwt = (req, res, next) => {
 
 // Admin routes
 app.post('/admin/signup', (req, res) => {
-  // logic to sign up admin
+  const { username, password } = req.body
+  if (!username || !password) return res.status(403).json({ message: "Missing credentials" })
+  const adminExist = ADMINS.find(ele => ele.username === username)
+  if (adminExist) return res.status(403).json({ message: "Admin already exists" })
+  if (!adminExist) {
+    ADMINS.push({ username: username, password: password })
+    fs.writeFileSync('admin.json', JSON.stringify(ADMINS))
+    const token = jwt.sign({ username, role: 'Admin' }, SECRET, { expiresIn: "1h" })
+    res.json({ message: "Admin created successfully", token: token })
+  }
 });
 
 app.post('/admin/login', (req, res) => {
-  // logic to log in admin
+  const { username, password } = req.headers;
+  if (!username || !password) return res.status(403).json({ message: "username or pass missing" })
+  const admin = ADMINS.find(a => a.username === username && a.password === password);
+  if (admin) {
+    const token = jwt.sign({ username, role: 'admin' }, SECRET, { expiresIn: '1h' });
+    res.json({ message: 'Logged in successfully', token });
+  } else {
+    res.status(403).json({ message: 'Invalid username or password' });
+  }
+
 });
 
 app.post('/admin/courses', (req, res) => {
