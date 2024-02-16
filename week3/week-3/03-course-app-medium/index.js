@@ -73,12 +73,20 @@ app.post('/admin/courses', authJwt, (req, res) => {
   res.json({ message: "Course added successfully", course: newCourse })
 });
 
-app.put('/admin/courses/:courseId', (req, res) => {
-  // logic to edit a course
+app.put('/admin/courses/:courseId', authJwt, (req, res) => {
+  const id = req.params.courseId
+  const updatedCourse = req.body
+  const course = COURSES.find(c => c.courseId === parseInt(id))
+  if (!course) return res.status(403).json({ message: "invalid course id" })
+  if (course) {
+    Object.assign(course, updatedCourse)
+    fs.writeFileSync('courses.json', JSON.stringify(COURSES))
+    return res.json({ message: 'Course updated successfully' });
+  }
 });
 
-app.get('/admin/courses', (req, res) => {
-  // logic to get all courses
+app.get('/admin/courses', authJwt, (req, res) => {
+  res.json({ courses: COURSES })
 });
 
 // User routes
