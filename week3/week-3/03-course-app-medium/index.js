@@ -1,8 +1,7 @@
 const express = require('express');
+const fs = require('fs');
 const jwt = require('jsonwebtoken')
-const fs = require("fs")
 const app = express();
-
 
 app.use(express.json());
 
@@ -10,61 +9,68 @@ let ADMINS = [];
 let USERS = [];
 let COURSES = [];
 
-const SECRET = "S#C#RETKEY"
+const SECRET = "S#CR3T"
 
 try {
-  ADMINS = JSON.parse(fs.readFileSync('admin.json', 'utf-8'))
-  USERS = JSON.parse(fs.readFileSync('user.json', 'utf-8'))
-  COURSES = JSON.parse(fs.readFileSync('courses.json', 'utf-8'))
+  ADMINS = JSON.parse(fs.readFileSync('admin.json', 'utf8'))
+  USERS = JSON.parse(fs.readFileSync('user.json', 'utf8'))
+  COURSES = JSON.parse(fs.readFileSync('courses.json', 'utf8'))
 
-} catch (e) {
+} catch {
   ADMINS = []
   USERS = []
   COURSES = []
 }
 
-const authenticateJwt = (req, res, next) => {
-  const authHeader = req.headers.authorization
-  if (authHeader) {
-    const token = authHeader.split(' ')[1]
+
+const authJwt = (req, res, next) => {
+  const auth = req.headers.authorization
+  if (!auth) return res.status(403).json({ message: "invalid request" })
+  if (auth) {
+    const token = auth.split(" ")[1]
     jwt.verify(token, SECRET, (err, user) => {
-      if (err) return res.status(403).json({ message: "Invalid user" })
+      if (err) return res.status(403).json({ message: "invalid request" })
       req.user = user
       next()
     })
-  } else return res.json({ message: "Invalid user" })
+  }
+
 }
+
+
 
 
 // Admin routes
 app.post('/admin/signup', (req, res) => {
   const { username, password } = req.body
-  if (!username || !password) return res.status(403).json({ message: "Missing credentials" })
-  const adminExist = ADMINS.find(ele => ele.username === username)
-  if (adminExist) return res.status(403).json({ message: "Admin already exists" })
-  if (!adminExist) {
-    ADMINS.push({ username: username, password: password })
-    fs.writeFileSync('admin.json', JSON.stringify(ADMINS))
-    const token = jwt.sign({ username, role: 'Admin' }, SECRET, { expiresIn: "1h" })
-    res.json({ message: "Admin created successfully", token: token })
+  if (!username || !password) return res.status(403).json({ message: "invalid request" })
+  const adminExists = ADMINS.find(a => a.username === username)
+  if (adminExists) return res.status(403).json({ message: "admin already exist" })
+  if (!adminExists) {
+    ADMINS.push({ username, password })
+    const token = jwt.sign({ username, role: "Admin" }, SECRET)
+    return res.json({ message: "admin created!", token: token })
   }
 });
 
 app.post('/admin/login', (req, res) => {
-  const { username, password } = req.headers;
-  if (!username || !password) return res.status(403).json({ message: "username or pass missing" })
-  const admin = ADMINS.find(a => a.username === username && a.password === password);
+  const { username, password } = req.body
+  if (!username || !password) return res.status(403).json({ message: "invalid request" })
+  const admin = ADMINS.find(a => a.username === username && a.password === password)
+  if (!admin) return res.status(403).json({ message: "invalid request" })
   if (admin) {
-    const token = jwt.sign({ username, role: 'admin' }, SECRET, { expiresIn: '1h' });
-    res.json({ message: 'Logged in successfully', token });
-  } else {
-    res.status(403).json({ message: 'Invalid username or password' });
+    const token = jwt.sign({ username, role: "Admin" }, SECRET)
+    return res.json({ message: "admin logged in!", token: token })
   }
-
 });
 
-app.post('/admin/courses', (req, res) => {
-  // logic to create a course
+app.post('/admin/courses', authJwt, (req, res) => {
+  var newCourse = req.body
+  const courseId = Math.floor(Math.random() * 10000)
+  newCourse = { ...newCourse, courseId: courseId }
+  COURSES.push(newCourse)
+  fs.writeFileSync('courses.json', JSON.stringify(COURSES))
+  res.json({ message: "Course added successfully", course: newCourse })
 });
 
 app.put('/admin/courses/:courseId', (req, res) => {
