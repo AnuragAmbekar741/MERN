@@ -91,23 +91,52 @@ app.get('/admin/courses', authJwt, (req, res) => {
 
 // User routes
 app.post('/users/signup', (req, res) => {
-  // logic to sign up user
+  const { username, password } = req.body
+  if (!username || !password) return res.status(403).json({ message: "invalid request" })
+  const userExists = USERS.find(a => a.username === username)
+  if (userExists) return res.status(403).json({ message: "admin already exist" })
+  if (!userExists) {
+    USERS.push({ username, password })
+    const token = jwt.sign({ username, role: "Admin" }, SECRET)
+    return res.json({ message: "admin created!", token: token })
+  }
 });
 
 app.post('/users/login', (req, res) => {
-  // logic to log in user
+  const { username, password } = req.body
+  if (!username || !password) return res.status(403).json({ message: "invalid request" })
+  const user = USERS.find(a => a.username === username && a.password === password)
+  if (!user) return res.status(403).json({ message: "invalid request" })
+  if (user) {
+    const token = jwt.sign({ username, role: "Admin" }, SECRET)
+    return res.json({ message: "admin logged in!", token: token })
+  }
 });
 
-app.get('/users/courses', (req, res) => {
-  // logic to list all courses
+app.get('/users/courses', authJwt, (req, res) => {
+  res.json({ courses: COURSES })
 });
 
-app.post('/users/courses/:courseId', (req, res) => {
-  // logic to purchase a course
+app.post('/users/courses/:courseId', authJwt, (req, res) => {
+  const courseId = req.params.courseId
+  const courseToPurchase = COURSES.find(c => c.courseId === parseInt(courseId))
+  if (!courseToPurchase) return res.status(403)
+  const user = USERS.find(u => u.username === req.user.username)
+  if (user) {
+    if (!user.purchasedCourses) user.purchasedCourses = []
+    user.purchasedCourses.push(courseToPurchase)
+    fs.writeFileSync('user.json', JSON.stringify(USERS))
+    return res.json({ message: "course purchased", course: user.purchasedCourses })
+  } else {
+    return res.status(403)
+  }
 });
 
-app.get('/users/purchasedCourses', (req, res) => {
-  // logic to view purchased courses
+app.get('/users/purchasedCourses', authJwt, (req, res) => {
+  const user = USERS.find(u => u.username === req.user.username)
+  if (user) {
+    res.json({ purchasedCourses: user.purchasedCourses })
+  }
 });
 
 app.listen(3000, () => {
