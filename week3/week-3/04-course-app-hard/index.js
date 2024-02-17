@@ -1,11 +1,33 @@
 const express = require('express');
+const jwt = require("jsonwebtoken")
+const mongoose = require('mongoose');
+
 const app = express();
 
 app.use(express.json());
 
-let ADMINS = [];
-let USERS = [];
-let COURSES = [];
+const userSchema = new mongoose.Schema({
+  username: String,
+  password: String,
+  purchasedCourses: [{ type: mongoose.Schema.Types.ObjectId, ref: "Course" }]
+})
+
+const adminSchema = new mongoose.Schema({
+  username: { type: String, require: true },
+  password: String,
+})
+
+const courseSchema = new mongoose.Schema({
+  title: String,
+  description: String,
+  price: Number,
+  imageLink: String,
+  published: Boolean
+})
+
+const user = mongoose.model("User", userSchema)
+const admin = mongoose.model("Admin", adminSchema)
+const course = mongoose.model("Course", courseSchema)
 
 // Admin routes
 app.post('/admin/signup', (req, res) => {
